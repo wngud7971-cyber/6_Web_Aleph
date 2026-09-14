@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createTodo } from "@/app/actions";
+import RichTextEditor from "@/app/components/RichTextEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function NewTodoPage({ searchParams }) {
           </label>
           <label>
             내용
-            <textarea name="content" placeholder="자세한 설명(선택)" />
+            <RichTextEditor name="content" defaultValue="" />
           </label>
           <div className="row2">
             <label>
@@ -52,7 +53,8 @@ export default async function NewTodoPage({ searchParams }) {
             <label>
               우선순위
               <select name="priority" defaultValue="보통">
-                <option value="높음">높음</option>
+                <option value="최우선">최우선</option>
+                  <option value="높음">높음</option>
                 <option value="보통">보통</option>
                 <option value="낮음">낮음</option>
               </select>

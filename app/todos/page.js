@@ -14,7 +14,7 @@ const SORT_OPTIONS = {
   title: "제목 가나다순",
 };
 
-const PRIORITY_RANK = { 높음: 0, 보통: 1, 낮음: 2 };
+const PRIORITY_RANK = { 최우선: 0, 높음: 1, 보통: 2, 낮음: 3 };
 
 export default async function TodosPage({ searchParams }) {
   const {
@@ -121,6 +121,7 @@ export default async function TodosPage({ searchParams }) {
             우선순위
             <select name="priority" defaultValue={priority}>
               <option value="">전체</option>
+              <option value="최우선">최우선</option>
               <option value="높음">높음</option>
               <option value="보통">보통</option>
               <option value="낮음">낮음</option>

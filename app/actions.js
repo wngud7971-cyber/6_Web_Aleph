@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 function num(v, fallback = 0) {
   const n = parseFloat(v);
@@ -88,7 +89,7 @@ export async function createTodo(formData) {
     data: {
       planId,
       title: String(formData.get("title") || "").trim(),
-      content: String(formData.get("content") || "").trim() || null,
+      content: sanitizeHtml(formData.get("content")) || null,
       dueDate: String(formData.get("dueDate") || "") || null,
       priority: String(formData.get("priority") || "보통"),
       tags: String(formData.get("tags") || "").trim(),
@@ -108,7 +109,7 @@ export async function updateTodo(formData) {
     where: { id },
     data: {
       title: String(formData.get("title") || "").trim(),
-      content: String(formData.get("content") || "").trim() || null,
+      content: sanitizeHtml(formData.get("content")) || null,
       dueDate: String(formData.get("dueDate") || "") || null,
       priority: String(formData.get("priority") || "보통"),
       tags: String(formData.get("tags") || "").trim(),

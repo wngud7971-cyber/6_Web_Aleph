@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { formatKST, formatMinutes } from "@/lib/time";
 import OkBanner from "@/app/components/OkBanner";
 import ConfirmButton from "@/app/components/ConfirmButton";
+import RichTextEditor from "@/app/components/RichTextEditor";
 import {
   updateTodo,
   deleteTodo,
@@ -40,7 +41,7 @@ export default async function EditTodoPage({ params, searchParams }) {
           </label>
           <label>
             내용
-            <textarea name="content" defaultValue={todo.content || ""} />
+            <RichTextEditor name="content" defaultValue={todo.content || ""} />
           </label>
           <div className="row2">
             <label>
@@ -63,7 +64,8 @@ export default async function EditTodoPage({ params, searchParams }) {
             <label>
               우선순위
               <select name="priority" defaultValue={todo.priority}>
-                <option value="높음">높음</option>
+                <option value="최우선">최우선</option>
+                  <option value="높음">높음</option>
                 <option value="보통">보통</option>
                 <option value="낮음">낮음</option>
               </select>

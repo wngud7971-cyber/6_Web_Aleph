@@ -34,7 +34,8 @@ export default async function EditPlanPage({ params }) {
         <label>
           우선순위
           <select name="priority" defaultValue={plan.priority}>
-            <option value="높음">높음</option>
+            <option value="최우선">최우선</option>
+                  <option value="높음">높음</option>
             <option value="보통">보통</option>
             <option value="낮음">낮음</option>
           </select>
