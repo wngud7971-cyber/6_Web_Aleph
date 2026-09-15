@@ -441,6 +441,83 @@ a.link:hover { border-bottom-color: var(--plan); }
   padding: 6px 8px;
 }
 
+/* ── 계획 아코디언 (날짜 상세) ── */
+.plan-accordion {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.plan-accordion summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--border-soft);
+}
+
+.plan-accordion summary::-webkit-details-marker { display: none; }
+
+.plan-accordion summary::before {
+  content: "▸";
+  margin-right: 8px;
+  color: var(--ink-muted);
+  display: inline-block;
+}
+
+.plan-accordion[open] summary::before { content: "▾"; }
+
+.plan-accordion-title { font-weight: 600; }
+
+.plan-accordion-body { padding: 14px; }
+
+.checklist {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.checklist li form { display: contents; }
+
+.check-toggle {
+  border: none;
+  background: none;
+  color: var(--plan);
+  font-size: 16px;
+  padding: 0 4px;
+  width: auto;
+}
+
+.checklist-label { flex: 1; font-size: 13.5px; }
+
+.checklist-done .checklist-label { color: var(--ink-faint); text-decoration: line-through; }
+
+.checklist-add-form {
+  flex-direction: row;
+  max-width: none;
+  gap: 8px;
+}
+
+.checklist-add-form input {
+  flex: 1;
+}
+
 @media (max-width: 860px) {
   .app-shell { flex-direction: column; }
   .sidebar {

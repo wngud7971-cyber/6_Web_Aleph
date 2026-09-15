@@ -11,12 +11,7 @@ export default async function CalendarHomePage({ searchParams }) {
   const rangeEnd = weeks[5][6].date;
   const today = kstTodayStr();
 
-  const [todos, plans, events] = await Promise.all([
-    prisma.todo.findMany({
-      where: { deletedAt: null, dueDate: { gte: rangeStart, lte: rangeEnd } },
-      include: { plan: true },
-      orderBy: { createdAt: "asc" },
-    }),
+  const [plans, events] = await Promise.all([
     prisma.plan.findMany({
       where: { periodStart: { lte: rangeEnd }, periodEnd: { gte: rangeStart } },
     }),
@@ -27,8 +22,7 @@ export default async function CalendarHomePage({ searchParams }) {
   ]);
 
   const dayMap = {};
-  const ensure = (d) => (dayMap[d] ||= { todos: [], events: [], plans: [] });
-  for (const t of todos) ensure(t.dueDate).todos.push(t);
+  const ensure = (d) => (dayMap[d] ||= { events: [], plans: [] });
   for (const e of events) ensure(e.date).events.push(e);
   for (const p of plans) {
     for (const week of weeks) {
@@ -43,7 +37,6 @@ export default async function CalendarHomePage({ searchParams }) {
   const prev = shiftMonth(year, month, -1);
   const next = shiftMonth(year, month, 1);
   const monthLabel = `${year}년 ${month}월`;
-  const PRIORITY_RANK = { 최우선: 0, 높음: 1, 보통: 2, 낮음: 3 };
 
   return (
     <section className="panel calendar-panel">
@@ -74,18 +67,14 @@ export default async function CalendarHomePage({ searchParams }) {
       {weeks.map((week, wi) => (
         <div className="cal-grid" key={wi}>
           {week.map((cell) => {
-            const data = dayMap[cell.date] || { todos: [], events: [], plans: [] };
+            const data = dayMap[cell.date] || { events: [], plans: [] };
             const isToday = cell.date === today;
             const dayNum = Number(cell.date.slice(-2));
 
-            // 이 날의 모든 항목을 한 줄로 모으되, 우선순위 높은 할 일을 맨 앞에 둔다.
-            const sortedTodos = [...data.todos].sort(
-              (a, b) => (PRIORITY_RANK[a.priority] ?? 9) - (PRIORITY_RANK[b.priority] ?? 9)
-            );
+            // 이 날의 계획·메모만 모은다 (할 일은 계획을 펼쳐야 보임).
             const allItems = [
-              ...sortedTodos.map((t) => ({ kind: "todo", obj: t })),
-              ...data.events.map((e) => ({ kind: "event", obj: e })),
               ...data.plans.map((p) => ({ kind: "plan", obj: p })),
+              ...data.events.map((e) => ({ kind: "event", obj: e })),
             ];
             const shown = allItems.slice(0, 2);
             const restCount = allItems.length - shown.length;
@@ -99,19 +88,6 @@ export default async function CalendarHomePage({ searchParams }) {
                 <div className="cal-cell-num">{dayNum}</div>
                 <div className="cal-cell-body">
                   {shown.map((item) => {
-                    if (item.kind === "todo") {
-                      const t = item.obj;
-                      return (
-                        <div
-                          key={`t-${t.id}`}
-                          className={`cal-chip cal-chip-todo ${t.status === "done" ? "cal-chip-done" : ""}`}
-                          title={t.title}
-                        >
-                          {t.status === "done" ? "✓ " : ""}
-                          {t.title}
-                        </div>
-                      );
-                    }
                     if (item.kind === "event") {
                       return (
                         <div key={`e-${item.obj.id}`} className="cal-chip cal-chip-event" title={item.obj.title}>

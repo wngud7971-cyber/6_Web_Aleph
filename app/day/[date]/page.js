@@ -25,16 +25,16 @@ export default async function DayDetailPage({ params, searchParams }) {
   const { date } = params;
   const weekday = WEEKDAY_LABELS[new Date(date + "T00:00:00").getDay()];
 
-  const [plans, allPlans, todos, events] = await Promise.all([
+  const [plansToday, events] = await Promise.all([
     prisma.plan.findMany({
       where: { periodStart: { lte: date }, periodEnd: { gte: date } },
+      include: {
+        todos: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: "asc" },
+        },
+      },
       orderBy: { createdAt: "desc" },
-    }),
-    prisma.plan.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.todo.findMany({
-      where: { deletedAt: null, dueDate: date },
-      include: { plan: true },
-      orderBy: { createdAt: "asc" },
     }),
     prisma.event.findMany({ where: { date }, orderBy: { createdAt: "desc" } }),
   ]);
@@ -62,123 +62,88 @@ export default async function DayDetailPage({ params, searchParams }) {
       </section>
 
       <section className="panel">
-        <h2>진행 중인 계획</h2>
-        {plans.length === 0 ? (
-          <p className="muted">이 날짜를 기간에 포함하는 계획이 없습니다.</p>
-        ) : (
-          <div className="grid-cards">
-            {plans.map((p) => (
-              <a className="stat-card" href={`/plans/${p.id}`} key={p.id}>
-                <span className="label">
-                  {p.title} ({p.periodStart} ~ {p.periodEnd})
-                </span>
-                <span className="num" style={{ fontSize: 13 }}>{p.priority}</span>
-              </a>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="panel">
-        <h2>이날 마감인 할 일 ({todos.length}개)</h2>
-        {todos.length === 0 ? (
-          <p className="muted">아직 없습니다.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>제목</th>
-                <th>계획</th>
-                <th>예상</th>
-                <th>상태</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {todos.map((t) => (
-                <tr key={t.id}>
-                  <td>{t.title}</td>
-                  <td>
-                    <a className="link" href={`/plans/${t.planId}`}>{t.plan.title}</a>
-                  </td>
-                  <td>{formatMinutes(t.estimatedMinutes)}</td>
-                  <td>
-                    <span className={`badge ${t.status}`}>
-                      {t.status === "done" ? "완료" : "진행 중"}
-                    </span>
-                  </td>
-                  <td className="inline-actions">
-                    {t.status === "todo" ? (
-                      <form action={completeTodo}>
-                        <input type="hidden" name="id" value={t.id} />
-                        <input type="hidden" name="redirectTo" value={`/day/${date}`} />
-                        <button type="submit">완료</button>
-                      </form>
-                    ) : (
-                      <form action={uncompleteTodo}>
-                        <input type="hidden" name="id" value={t.id} />
-                        <input type="hidden" name="redirectTo" value={`/day/${date}`} />
-                        <button type="submit" className="secondary">되돌리기</button>
-                      </form>
-                    )}
-                    <a className="link" href={`/todos/${t.id}/edit`}>고치기</a>
-                    <form action={deleteTodo}>
-                      <input type="hidden" name="id" value={t.id} />
-                      <input type="hidden" name="redirectTo" value={`/day/${date}`} />
-                      <ConfirmButton type="submit" className="danger" message="이 할 일을 지울까요?">
-                        지우기
-                      </ConfirmButton>
-                    </form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {allPlans.length === 0 ? (
-          <p className="muted" style={{ marginTop: 14 }}>
-            먼저 <a className="link" href="/plans/new">계획을 만들어야</a> 할 일을 붙일 수 있습니다.
+        <h2>진행 중인 계획 ({plansToday.length}개)</h2>
+        {plansToday.length === 0 ? (
+          <p className="muted">
+            이 날짜를 기간에 포함하는 계획이 없습니다.{" "}
+            <a className="link" href="/plans/new">계획 만들기</a>
           </p>
         ) : (
-          <form action={createTodo} style={{ marginTop: 16 }}>
-            <input type="hidden" name="dueDate" value={date} />
-            <input type="hidden" name="redirectTo" value={`/day/${date}`} />
-            <div className="row2">
-              <label>
-                계획
-                <select name="planId" required defaultValue={allPlans[0]?.id}>
-                  {allPlans.map((p) => (
-                    <option key={p.id} value={p.id}>{p.title}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                예상 시간(분)
-                <input type="number" min="0" step="5" name="estimatedMinutes" defaultValue={30} required />
-              </label>
-            </div>
-            <label>
-              할 일
-              <input name="title" required placeholder="이날 할 일" />
-            </label>
-            <div className="row2">
-              <label>
-                우선순위
-                <select name="priority" defaultValue="보통">
-                  <option value="최우선">최우선</option>
-                  <option value="높음">높음</option>
-                  <option value="보통">보통</option>
-                  <option value="낮음">낮음</option>
-                </select>
-              </label>
-              <label>
-                태그
-                <input name="tags" placeholder="쉼표로 구분" />
-              </label>
-            </div>
-            <button type="submit">이날 할 일 추가</button>
-          </form>
+          plansToday.map((p) => {
+            const doneCount = p.todos.filter((t) => t.status === "done").length;
+            return (
+              <details key={p.id} className="plan-accordion">
+                <summary>
+                  <span className="plan-accordion-title">{p.title}</span>
+                  <span className="muted">
+                    {p.periodStart} ~ {p.periodEnd} · {p.priority} · 할 일 {doneCount}/
+                    {p.todos.length}
+                  </span>
+                </summary>
+
+                <div className="plan-accordion-body">
+                  {p.todos.length === 0 ? (
+                    <p className="muted">아직 딸린 할 일이 없습니다.</p>
+                  ) : (
+                    <ul className="checklist">
+                      {p.todos.map((t) => (
+                        <li key={t.id} className={t.status === "done" ? "checklist-done" : ""}>
+                          {t.status === "todo" ? (
+                            <form action={completeTodo}>
+                              <input type="hidden" name="id" value={t.id} />
+                              <input type="hidden" name="redirectTo" value={`/day/${date}`} />
+                              <button type="submit" className="check-toggle" aria-label="완료로 표시">
+                                ☐
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={uncompleteTodo}>
+                              <input type="hidden" name="id" value={t.id} />
+                              <input type="hidden" name="redirectTo" value={`/day/${date}`} />
+                              <button type="submit" className="check-toggle" aria-label="진행중으로 되돌리기">
+                                ☑
+                              </button>
+                            </form>
+                          )}
+                          <span className="checklist-label">
+                            {t.title}
+                            {t.dueDate && <span className="muted"> · {t.dueDate}</span>}
+                            {t.priority === "최우선" && <span className="badge overdue">최우선</span>}
+                          </span>
+                          <a className="link" href={`/todos/${t.id}/edit`}>
+                            고치기
+                          </a>
+                          <form action={deleteTodo}>
+                            <input type="hidden" name="id" value={t.id} />
+                            <input type="hidden" name="redirectTo" value={`/day/${date}`} />
+                            <ConfirmButton type="submit" className="danger" message="이 할 일을 지울까요?">
+                              지우기
+                            </ConfirmButton>
+                          </form>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <form action={createTodo} className="checklist-add-form">
+                    <input type="hidden" name="planId" value={p.id} />
+                    <input type="hidden" name="redirectTo" value={`/day/${date}`} />
+                    <input type="hidden" name="estimatedMinutes" value={30} />
+                    <input type="hidden" name="priority" value="보통" />
+                    <input name="title" required placeholder="+ 할 일 추가" />
+                    <button type="submit" className="secondary">추가</button>
+                  </form>
+                  <p className="muted" style={{ marginTop: 6 }}>
+                    마감일·우선순위·태그 등 자세한 값은{" "}
+                    <a className="link" href={`/todos/new?planId=${p.id}`}>
+                      할 일 추가 화면
+                    </a>
+                    에서 설정할 수 있습니다.
+                  </p>
+                </div>
+              </details>
+            );
+          })
         )}
       </section>
 
