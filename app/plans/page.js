@@ -27,7 +27,8 @@ export default async function PlansPage({ searchParams }) {
       {plans.length === 0 ? (
         <p className="muted">아직 계획이 없습니다.</p>
       ) : (
-        <table>
+        <div className="table-scroll">
+            <table>
           <thead>
             <tr>
               <th>제목</th>
@@ -74,6 +75,7 @@ export default async function PlansPage({ searchParams }) {
             ))}
           </tbody>
         </table>
+            </div>
       )}
     </section>
   );

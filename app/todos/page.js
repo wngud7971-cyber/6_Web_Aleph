@@ -154,7 +154,8 @@ export default async function TodosPage({ searchParams }) {
       {todos.length === 0 ? (
         <p className="muted">조건에 맞는 할 일이 없습니다.</p>
       ) : (
-        <table>
+        <div className="table-scroll">
+            <table>
           <thead>
             <tr>
               <th>제목</th>
@@ -224,6 +225,7 @@ export default async function TodosPage({ searchParams }) {
             })}
           </tbody>
         </table>
+            </div>
       )}
     </section>
   );

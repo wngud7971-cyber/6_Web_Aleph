@@ -46,7 +46,8 @@ export default async function PlanDetailPage({ params, searchParams }) {
             </form>
           </div>
         </div>
-        <table>
+        <div className="table-scroll">
+            <table>
           <tbody>
             <tr>
               <th>기간</th>
@@ -68,6 +69,7 @@ export default async function PlanDetailPage({ params, searchParams }) {
             </tr>
           </tbody>
         </table>
+            </div>
       </section>
 
       <section className="panel">
@@ -146,7 +148,8 @@ export default async function PlanDetailPage({ params, searchParams }) {
         {plan.todos.length === 0 ? (
           <p className="muted">아직 할 일이 없습니다. 다섯 개 이상 넣어 보세요.</p>
         ) : (
-          <table>
+          <div className="table-scroll">
+            <table>
             <thead>
               <tr>
                 <th>제목</th>
@@ -180,6 +183,7 @@ export default async function PlanDetailPage({ params, searchParams }) {
               ))}
             </tbody>
           </table>
+            </div>
         )}
       </section>
     </>

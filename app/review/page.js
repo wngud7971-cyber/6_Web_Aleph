@@ -69,7 +69,8 @@ export default async function ReviewPage({ searchParams }) {
         {perPlan.length === 0 ? (
           <p className="muted">아직 계획이 없습니다.</p>
         ) : (
-          <table>
+          <div className="table-scroll">
+            <table>
             <thead>
               <tr>
                 <th>계획</th>
@@ -120,6 +121,7 @@ export default async function ReviewPage({ searchParams }) {
               ))}
             </tbody>
           </table>
+            </div>
         )}
       </section>
 
@@ -161,7 +163,8 @@ export default async function ReviewPage({ searchParams }) {
         {insights.length === 0 ? (
           <p className="muted">아직 없습니다.</p>
         ) : (
-          <table>
+          <div className="table-scroll">
+            <table>
             <thead>
               <tr>
                 <th>고칠 점</th>
@@ -179,6 +182,7 @@ export default async function ReviewPage({ searchParams }) {
               ))}
             </tbody>
           </table>
+            </div>
         )}
       </section>
     </>

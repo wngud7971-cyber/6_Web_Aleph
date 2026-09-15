@@ -20,7 +20,8 @@ export default async function ExecutionListPage() {
       {logs.length === 0 ? (
         <p className="muted">아직 실행 기록이 없습니다.</p>
       ) : (
-        <table>
+        <div className="table-scroll">
+            <table>
           <thead>
             <tr>
               <th>할 일</th>
@@ -48,6 +49,7 @@ export default async function ExecutionListPage() {
             ))}
           </tbody>
         </table>
+            </div>
       )}
     </section>
   );
