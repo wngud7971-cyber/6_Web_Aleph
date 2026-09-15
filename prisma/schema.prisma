@@ -55,6 +55,7 @@ model Plan {
   updatedAt       DateTime       @updatedAt
   todos           Todo[]
   revisions       PlanRevision[]
+  ruleChanges     RuleChange[]
 
   @@index([userId])
 }
@@ -153,12 +154,13 @@ model Event {
 // Plan.update는 이미 PlanRevision으로 "고치기 전 값"을 스냅샷 남기지만,
 // "왜 바꿨는지"는 별도로 사람이 적어야 하므로 이 테이블에 붙여 남긴다.
 model RuleChange {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planId      String
-  reason      String
-  changedAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  reason    String
+  changedAt DateTime @default(now())
 
   @@index([userId])
   @@index([planId])
