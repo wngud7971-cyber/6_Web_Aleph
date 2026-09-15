@@ -18,12 +18,14 @@ export async function GET() {
   const planIds = plans.map((p) => p.id);
   const todoIds = todos.map((t) => t.id);
 
-  const [planRevisions, executionLogs, completionEvents, insights] = await Promise.all([
-    prisma.planRevision.findMany({ where: { planId: { in: planIds } } }),
-    prisma.executionLog.findMany({ where: { todoId: { in: todoIds } } }),
-    prisma.completionEvent.findMany({ where: { todoId: { in: todoIds } } }),
-    prisma.insight.findMany({ where: { userId: user.id } }),
-  ]);
+  const [planRevisions, executionLogs, completionEvents, insights, ruleChanges] =
+    await Promise.all([
+      prisma.planRevision.findMany({ where: { planId: { in: planIds } } }),
+      prisma.executionLog.findMany({ where: { todoId: { in: todoIds } } }),
+      prisma.completionEvent.findMany({ where: { todoId: { in: todoIds } } }),
+      prisma.insight.findMany({ where: { userId: user.id } }),
+      prisma.ruleChange.findMany({ where: { userId: user.id }, orderBy: { changedAt: "asc" } }),
+    ]);
 
   const payload = {
     exportedAt: new Date().toISOString(),
@@ -34,6 +36,7 @@ export async function GET() {
     executionLogs,
     completionEvents,
     insights,
+    ruleChanges,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
