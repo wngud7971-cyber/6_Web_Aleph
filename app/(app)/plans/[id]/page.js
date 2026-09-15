@@ -18,6 +18,7 @@ export default async function PlanDetailPage({ params, searchParams }) {
     where: { id: params.id, userId: user.id },
     include: {
       revisions: { orderBy: { capturedAt: "desc" } },
+      ruleChanges: { orderBy: { changedAt: "asc" } },
       todos: { where: { deletedAt: null }, orderBy: { createdAt: "desc" } },
     },
   });
@@ -90,6 +91,24 @@ export default async function PlanDetailPage({ params, searchParams }) {
                 {r.estimatedHours}시간
               </div>
               <div className="muted">성공 기준: {r.successCriteria}</div>
+            </div>
+          ))
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>규칙 변경 이력 ({plan.ruleChanges.length}건)</h2>
+        <p className="muted" style={{ marginTop: -8 }}>
+          "고친 내용 저장" 할 때 규칙 변경 이유를 적으면 여기 시각과 함께
+          남습니다. 5일 기록 중 2일차 뒤·3일차 앞에 하나가 있어야 합니다.
+        </p>
+        {plan.ruleChanges.length === 0 ? (
+          <p className="muted">아직 규칙을 바꾼 적이 없습니다.</p>
+        ) : (
+          plan.ruleChanges.map((rc) => (
+            <div className="history-item" key={rc.id}>
+              <div className="muted">{formatKST(rc.changedAt)}</div>
+              <div>{rc.reason}</div>
             </div>
           ))
         )}
