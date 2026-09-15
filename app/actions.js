@@ -66,37 +66,35 @@ export async function updatePlan(formData) {
   const id = String(formData.get("id"));
   const before = await loadOwnedPlan(id, user.id);
 
-  await prisma.planRevision.create({
-    data: {
-      planId: id,
-      title: before.title,
-      periodStart: before.periodStart,
-      periodEnd: before.periodEnd,
-      priority: before.priority,
-      successCriteria: before.successCriteria,
-      estimatedHours: before.estimatedHours,
-    },
-  });
-
-  // 계획 규칙(성공 기준 등)을 실제로 바꿨다면, 그 이유를 남긴다 (T07-C09~C11).
   const ruleChangeReason = String(formData.get("ruleChangeReason") || "").trim();
-  if (ruleChangeReason) {
-    await prisma.ruleChange.create({
-      data: { userId: user.id, planId: id, reason: ruleChangeReason },
-    });
-  }
+  const nextData = {
+    title: String(formData.get("title") || "").trim(),
+    periodStart: String(formData.get("periodStart") || ""),
+    periodEnd: String(formData.get("periodEnd") || ""),
+    priority: String(formData.get("priority") || "보통"),
+    successCriteria: String(formData.get("successCriteria") || "").trim(),
+    estimatedHours: num(formData.get("estimatedHours")),
+  };
 
-  await prisma.plan.update({
-    where: { id },
-    data: {
-      title: String(formData.get("title") || "").trim(),
-      periodStart: String(formData.get("periodStart") || ""),
-      periodEnd: String(formData.get("periodEnd") || ""),
-      priority: String(formData.get("priority") || "보통"),
-      successCriteria: String(formData.get("successCriteria") || "").trim(),
-      estimatedHours: num(formData.get("estimatedHours")),
-    },
-  });
+  // 세 가지(고치기 전 스냅샷 남기기 / 규칙 변경 이유 남기기 / 실제 값 갱신)를
+  // 한 트랜잭션으로 묶는다 — 중간에 하나라도 실패하면 전부 되돌아간다.
+  await prisma.$transaction([
+    prisma.planRevision.create({
+      data: {
+        planId: id,
+        title: before.title,
+        periodStart: before.periodStart,
+        periodEnd: before.periodEnd,
+        priority: before.priority,
+        successCriteria: before.successCriteria,
+        estimatedHours: before.estimatedHours,
+      },
+    }),
+    ...(ruleChangeReason
+      ? [prisma.ruleChange.create({ data: { userId: user.id, planId: id, reason: ruleChangeReason } })]
+      : []),
+    prisma.plan.update({ where: { id }, data: nextData }),
+  ]);
 
   revalidatePath(`/plans/${id}`);
   revalidatePath("/plans");
