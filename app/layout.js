@@ -6,6 +6,10 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // 이 루트 레이아웃은 로그인 화면(/login, /signup)과 로그인 뒤 화면
+  // 양쪽에 다 씌워진다. 그래서 다이어리 전용 UI(사이드바, 로그아웃 버튼)는
+  // 여기 두지 않고 app/(app)/layout.js 쪽으로 옮겼다 — 그래야 로그인하지
+  // 않은 사람에게 "할 일/계획" 링크가 보이는 일이 없다 (T07-C03).
   return (
     <html lang="ko">
       <head>
@@ -16,27 +20,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>
-        <div className="app-shell">
-          <aside className="sidebar">
-            <a href="/" className="brand">
-              플랜두씨 다이어리
-            </a>
-            <nav className="nav">
-              <a href="/plans">계획</a>
-              <a href="/todos">할 일</a>
-              <a href="/execution/new">실행 기록</a>
-              <a href="/review">돌아보기</a>
-              <a href="/api/export">내보내기</a>
-            </nav>
-            <div className="notice-banner">
-              지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이
-              봐도 괜찮은 내용만 넣으세요
-            </div>
-          </aside>
-          <main className="content">{children}</main>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

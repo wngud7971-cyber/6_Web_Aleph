@@ -547,3 +547,38 @@ a.link:hover { border-bottom-color: var(--plan); }
     padding-top: 0;
   }
 }
+
+/* ── 로그인/가입 화면 ────────────────────────────── */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 12px 32px rgba(58, 53, 47, 0.06);
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-error {
+  background: #fbe3e0;
+  color: #9a3b2f;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  margin: 0 0 14px;
+}
