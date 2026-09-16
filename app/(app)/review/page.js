@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { computeReview } from "@/lib/review";
+import { computeReview, computeDailyBreakdown } from "@/lib/review";
 import { formatMinutes, formatKST } from "@/lib/time";
 import { createInsight } from "@/app/actions";
 import OkBanner from "@/app/components/OkBanner";
@@ -20,6 +20,12 @@ export default async function ReviewPage({ searchParams }) {
   const insights = await prisma.insight.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
+  });
+  const dailyBreakdown = await computeDailyBreakdown(user.id);
+  const ruleChanges = await prisma.ruleChange.findMany({
+    where: { userId: user.id },
+    orderBy: { changedAt: "asc" },
+    include: { plan: true },
   });
   const planById = Object.fromEntries(plans.map((p) => [p.id, p]));
 
@@ -125,6 +131,64 @@ export default async function ReviewPage({ searchParams }) {
             </tbody>
           </table>
             </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>날짜별 기록 (카드5용)</h2>
+        <p className="sub">
+          "그날 완료한 할 일들의 (실제분-예상분) 합산" 규칙을 서울 시간(Asia/Seoul)
+          기준 실제 날짜별로 묶어서 보여줍니다. 서로 다른 날짜가 5개 있는지,
+          규칙 변경이 어느 날짜 사이에 있는지 여기서 바로 확인하세요.
+        </p>
+        {dailyBreakdown.length === 0 ? (
+          <p className="muted">아직 완료한 할 일이 없습니다.</p>
+        ) : (
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>날짜 (KST)</th>
+                  <th>완료한 할 일 수</th>
+                  <th>예상 합계</th>
+                  <th>실제 합계</th>
+                  <th>차이 (실제-예상)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyBreakdown.map((d) => (
+                  <tr key={d.date}>
+                    <td>{d.date}</td>
+                    <td>{d.todoCount}</td>
+                    <td>{formatMinutes(d.estimatedTotal)}</td>
+                    <td>{formatMinutes(d.actualTotal)}</td>
+                    <td>
+                      {d.diff > 0 ? "+" : ""}
+                      {formatMinutes(d.diff)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="muted" style={{ marginTop: 12 }}>
+          서로 다른 날짜 수: <b>{dailyBreakdown.length}</b>건
+          {dailyBreakdown.length >= 5 ? " — 5일 조건 충족" : " — 아직 5일 미만"}
+        </p>
+
+        <h3 style={{ marginTop: 20 }}>규칙 변경 시각 ({ruleChanges.length}건)</h3>
+        {ruleChanges.length === 0 ? (
+          <p className="muted">아직 규칙을 바꾼 적이 없습니다.</p>
+        ) : (
+          ruleChanges.map((rc) => (
+            <div className="history-item" key={rc.id}>
+              <div className="muted">
+                {formatKST(rc.changedAt)} · {rc.plan.title}
+              </div>
+              <div>{rc.reason}</div>
+            </div>
+          ))
         )}
       </section>
 
