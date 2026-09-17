@@ -181,6 +181,7 @@ export default async function TodosPage({ searchParams }) {
               <th>우선순위</th>
               <th>태그</th>
               <th>예상</th>
+              <th>실제</th>
               <th>상태</th>
               <th></th>
             </tr>
@@ -192,6 +193,7 @@ export default async function TodosPage({ searchParams }) {
                 (l) => l.blockerReason && l.blockerReason.trim() !== ""
               );
               const noLog = t.status === "done" && t.executionLogs.length === 0;
+              const actualMinutes = t.executionLogs.reduce((s, l) => s + (l.actualMinutes || 0), 0);
               return (
                 <tr key={t.id}>
                   <td>{t.title}</td>
@@ -204,6 +206,7 @@ export default async function TodosPage({ searchParams }) {
                   <td>{t.priority}</td>
                   <td>{t.tags}</td>
                   <td>{formatMinutes(t.estimatedMinutes)}</td>
+                  <td>{t.executionLogs.length > 0 ? formatMinutes(actualMinutes) : "-"}</td>
                   <td>
                     <span className={`badge ${t.status}`}>
                       {t.status === "done" ? "완료" : "진행 중"}
