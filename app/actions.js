@@ -244,6 +244,23 @@ export async function createExecutionLog(formData) {
   redirect(withOk("/todos", "log-created"));
 }
 
+// 실행 기록 하나를 지운다. todo -> plan -> userId를 거쳐 소유자를 확인하므로,
+// 남의 실행 기록 id를 넣어도 404로 막힌다.
+export async function deleteExecutionLog(formData) {
+  const user = await requireUser();
+  const id = String(formData.get("id"));
+  const log = await prisma.executionLog.findFirst({
+    where: { id, todo: { plan: { userId: user.id } } },
+  });
+  if (!log) notFound();
+  await prisma.executionLog.delete({ where: { id } });
+  const redirectTo = String(formData.get("redirectTo") || "/todos");
+  revalidatePath("/execution");
+  revalidatePath("/todos");
+  revalidatePath("/review");
+  redirect(withOk(redirectTo, "log-deleted"));
+}
+
 // ---------- 돌아보기 -> 다음 계획 ----------
 
 export async function createInsight(formData) {
