@@ -65,6 +65,10 @@ export default async function TodosPage({ searchParams }) {
       t.executionLogs.some((l) => l.blockerReason && l.blockerReason.trim() !== "")
     );
   }
+  const { nolog = "" } = searchParams || {};
+  if (nolog === "1") {
+    todos = todos.filter((t) => t.status === "done" && t.executionLogs.length === 0);
+  }
 
   // 정렬 - 값이 같을 때는 항상 id로 2차 정렬해서 결과가 매번 달라지지 않게 한다.
   const cmp = {
@@ -157,6 +161,11 @@ export default async function TodosPage({ searchParams }) {
         같으면 항상 같은 순서가 되도록 id로 한 번 더 정렬합니다)
         {overdue === "1" && " · 지연만 보기"}
         {blocked === "1" && " · 막힘만 보기"}
+        {nolog === "1" && " · 실행기록 없는 완료만 보기"}
+        {" · "}
+        <a className="link" href="/todos?nolog=1">
+          실행기록 없는 완료 항목만 보기
+        </a>
       </p>
 
       {todos.length === 0 ? (
@@ -182,6 +191,7 @@ export default async function TodosPage({ searchParams }) {
               const isBlocked = t.executionLogs.some(
                 (l) => l.blockerReason && l.blockerReason.trim() !== ""
               );
+              const noLog = t.status === "done" && t.executionLogs.length === 0;
               return (
                 <tr key={t.id}>
                   <td>{t.title}</td>
@@ -199,7 +209,12 @@ export default async function TodosPage({ searchParams }) {
                       {t.status === "done" ? "완료" : "진행 중"}
                     </span>{" "}
                     {isOverdue && <span className="badge overdue">지연</span>}{" "}
-                    {isBlocked && <span className="badge blocked">막힘</span>}
+                    {isBlocked && <span className="badge blocked">막힘</span>}{" "}
+                    {noLog && (
+                      <span className="badge overdue" title="완료됐지만 실행 기록이 없습니다">
+                        실행기록 없음
+                      </span>
+                    )}
                   </td>
                   <td className="inline-actions">
                     <a className="link" href={`/todos/${t.id}/edit`}>
