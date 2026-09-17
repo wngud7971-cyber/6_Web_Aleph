@@ -10,6 +10,7 @@ import {
   deleteTodo,
   completeTodo,
   uncompleteTodo,
+  deleteExecutionLog,
 } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
@@ -123,6 +124,7 @@ export default async function EditTodoPage({ params, searchParams }) {
                 <th>종료</th>
                 <th>실제 걸린 시간</th>
                 <th>막혔던 이유</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -132,6 +134,23 @@ export default async function EditTodoPage({ params, searchParams }) {
                   <td>{formatKST(l.endedAt)}</td>
                   <td>{formatMinutes(l.actualMinutes)}</td>
                   <td>{l.blockerReason || "-"}</td>
+                  <td>
+                    <form action={deleteExecutionLog}>
+                      <input type="hidden" name="id" value={l.id} />
+                      <input
+                        type="hidden"
+                        name="redirectTo"
+                        value={`/todos/${todo.id}/edit`}
+                      />
+                      <ConfirmButton
+                        type="submit"
+                        className="danger"
+                        message="이 실행 기록을 지울까요?"
+                      >
+                        지우기
+                      </ConfirmButton>
+                    </form>
+                  </td>
                 </tr>
               ))}
             </tbody>
