@@ -215,13 +215,35 @@ export async function uncompleteTodo(formData) {
 
 // ---------- 실행 기록 (ExecutionLog) ----------
 
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+// date(YYYY-MM-DD) + hour(0~23) + minute(0~59)을 "+09:00"(KST) 오프셋을 명시해
+// 조합한다. datetime-local처럼 브라우저가 오전/오후로 잘못 보여줄 여지도 없고,
+// 서버가 어느 시간대에서 돌든(Vercel은 보통 UTC) +09:00을 직접 박아뒀으므로
+// 항상 "입력한 그 숫자 그대로"가 서울 시간으로 저장된다.
+function kstDateTimeFromParts(dateStr, hourStr, minuteStr) {
+  const h = pad2(parseInt(hourStr, 10) || 0);
+  const m = pad2(parseInt(minuteStr, 10) || 0);
+  return new Date(`${dateStr}T${h}:${m}:00+09:00`);
+}
+
 export async function createExecutionLog(formData) {
   const user = await requireUser();
   const todoId = String(formData.get("todoId"));
   await loadOwnedTodo(todoId, user.id); // 남의 todoId를 끼워 넣어도 여기서 막힘
 
-  const startedAt = new Date(String(formData.get("startedAt")));
-  const endedAt = new Date(String(formData.get("endedAt")));
+  const startedAt = kstDateTimeFromParts(
+    formData.get("startedAtDate"),
+    formData.get("startedAtHour"),
+    formData.get("startedAtMinute")
+  );
+  const endedAt = kstDateTimeFromParts(
+    formData.get("endedAtDate"),
+    formData.get("endedAtHour"),
+    formData.get("endedAtMinute")
+  );
   const explicitMinutes = formData.get("actualMinutes");
   const actualMinutes =
     explicitMinutes && String(explicitMinutes).trim() !== ""
