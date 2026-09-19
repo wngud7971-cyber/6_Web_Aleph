@@ -4,12 +4,13 @@ import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function ExecutionListPage() {
+export default async function ExecutionListPage({ searchParams }) {
   const user = await requireUser();
+  const sort = searchParams?.sort === "asc" ? "asc" : "desc";
   const logs = await prisma.executionLog.findMany({
     where: { todo: { plan: { userId: user.id } } },
     include: { todo: { include: { plan: true } } },
-    orderBy: { startedAt: "desc" },
+    orderBy: { startedAt: sort },
   });
 
   return (
@@ -20,6 +21,11 @@ export default async function ExecutionListPage() {
           + 실행 기록 남기기
         </a>
       </div>
+      <p className="muted">
+        정렬: {sort === "asc" ? <b>오래된 순</b> : <a className="link" href="/execution?sort=asc">오래된 순</a>}
+        {" · "}
+        {sort === "desc" ? <b>최신 순</b> : <a className="link" href="/execution?sort=desc">최신 순</a>}
+      </p>
       {logs.length === 0 ? (
         <p className="muted">아직 실행 기록이 없습니다.</p>
       ) : (
