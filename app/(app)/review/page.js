@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { prisma } from "@/lib/prisma";
 import { computeReview, computeDailyBreakdown } from "@/lib/review";
 import { formatMinutes, formatKST } from "@/lib/time";
@@ -157,16 +158,30 @@ export default async function ReviewPage({ searchParams }) {
               </thead>
               <tbody>
                 {dailyBreakdown.map((d) => (
-                  <tr key={d.date}>
-                    <td>{d.date}</td>
-                    <td>{d.todoCount}</td>
-                    <td>{formatMinutes(d.estimatedTotal)}</td>
-                    <td>{formatMinutes(d.actualTotal)}</td>
-                    <td>
-                      {d.diff > 0 ? "+" : ""}
-                      {formatMinutes(d.diff)}
-                    </td>
-                  </tr>
+                  <Fragment key={d.date}>
+                    <tr>
+                      <td>{d.date}</td>
+                      <td>{d.todoCount}</td>
+                      <td>{formatMinutes(d.estimatedTotal)}</td>
+                      <td>{formatMinutes(d.actualTotal)}</td>
+                      <td>
+                        {d.diff > 0 ? "+" : ""}
+                        {formatMinutes(d.diff)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={5} style={{ paddingTop: 0, paddingBottom: 12 }}>
+                        <ul style={{ margin: "4px 0 0", paddingLeft: 20, color: "var(--muted)" }}>
+                          {d.todos.map((t) => (
+                            <li key={t.id}>
+                              [{t.planTitle}] {t.title} — 예상 {formatMinutes(t.estimated)} / 실제{" "}
+                              {formatMinutes(t.actual)}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
