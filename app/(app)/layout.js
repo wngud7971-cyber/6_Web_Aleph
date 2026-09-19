@@ -17,7 +17,7 @@ export default async function AppLayout({ children }) {
         <nav className="nav">
           <a href="/plans">계획</a>
           <a href="/todos">할 일</a>
-          <a href="/execution/new">실행 기록</a>
+          <a href="/execution">실행 기록</a>
           <a href="/review">돌아보기</a>
           <a href="/api/export">내보내기</a>
           <a href="/account">계정</a>
