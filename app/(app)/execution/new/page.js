@@ -40,16 +40,40 @@ export default async function NewExecutionLogPage({ searchParams }) {
               ))}
             </select>
           </label>
-          <div className="row2">
-            <label>
-              시작 시각
-              <input type="datetime-local" name="startedAt" required />
-            </label>
-            <label>
-              끝난 시각
-              <input type="datetime-local" name="endedAt" required />
-            </label>
-          </div>
+          <fieldset>
+            <legend>시작 시각 (오전/오후 없이 0~23시로 입력)</legend>
+            <div className="row3">
+              <label>
+                날짜
+                <input type="date" name="startedAtDate" required />
+              </label>
+              <label>
+                시 (0~23)
+                <input type="number" name="startedAtHour" min="0" max="23" step="1" required />
+              </label>
+              <label>
+                분 (0~59)
+                <input type="number" name="startedAtMinute" min="0" max="59" step="1" required />
+              </label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>끝난 시각 (오전/오후 없이 0~23시로 입력)</legend>
+            <div className="row3">
+              <label>
+                날짜
+                <input type="date" name="endedAtDate" required />
+              </label>
+              <label>
+                시 (0~23)
+                <input type="number" name="endedAtHour" min="0" max="23" step="1" required />
+              </label>
+              <label>
+                분 (0~59)
+                <input type="number" name="endedAtMinute" min="0" max="59" step="1" required />
+              </label>
+            </div>
+          </fieldset>
           <label>
             실제로 걸린 시간(분) — 비워두면 시작·끝 시각으로 자동 계산합니다
             <input type="number" min="0" step="1" name="actualMinutes" />
