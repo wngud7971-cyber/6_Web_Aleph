@@ -138,19 +138,21 @@ export default async function ReviewPage({ searchParams }) {
       <section className="panel">
         <h2>날짜별 기록 (카드5용)</h2>
         <p className="sub">
-          "그날 완료한 할 일들의 (실제분-예상분) 합산" 규칙을 서울 시간(Asia/Seoul)
-          기준 실제 날짜별로 묶어서 보여줍니다. 서로 다른 날짜가 5개 있는지,
-          규칙 변경이 어느 날짜 사이에 있는지 여기서 바로 확인하세요.
+          "그날 실행한 할 일들의 (실제분-예상분) 합산" 규칙을, 각 실행 기록의
+          <b>시작 시각</b>을 서울 시간(Asia/Seoul) 기준으로 묶어서 보여줍니다
+          (할 일을 완료 체크한 시각이 아니라, 실행 기록에 적은 시작 시각
+          기준입니다). 서로 다른 날짜가 5개 있는지, 규칙 변경이 어느 날짜
+          사이에 있는지 여기서 바로 확인하세요.
         </p>
         {dailyBreakdown.length === 0 ? (
-          <p className="muted">아직 완료한 할 일이 없습니다.</p>
+          <p className="muted">아직 실행 기록이 없습니다.</p>
         ) : (
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <th>날짜 (KST)</th>
-                  <th>완료한 할 일 수</th>
+                  <th>실행 기록 수</th>
                   <th>예상 합계</th>
                   <th>실제 합계</th>
                   <th>차이 (실제-예상)</th>
